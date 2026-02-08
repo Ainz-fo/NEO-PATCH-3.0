@@ -36,28 +36,42 @@ module.exports = async function message_upsert(m, ovl) {
         ms.text
     }[mtype] || "";
 
-    const ms_org = ms.key.remoteJid;
+    const ms_org =
+      (ms.key.remoteJidAlt || ms.key.remoteJid) === decodeJid(ovl.user.lid)
+        ? id_Bot
+        : (ms.key.remoteJidAlt || ms.key.remoteJid);
+
     const id_Bot = decodeJid(ovl.user.id);
     const id_Bot_N = id_Bot.split('@')[0];
 
     const verif_Groupe = ms_org.endsWith("@g.us");
     const infos_Groupe = verif_Groupe ? await ovl.groupMetadata(ms_org) : {};
+    
+    if (infos_Groupe.participants) {
+  infos_Groupe.participants = infos_Groupe.participants.map(p => ({
+    ...p,
+    jid: p.phoneNumber
+  }));
+    }
+    
     const nom_Groupe = infos_Groupe.subject || "";
     const mbre_membre = verif_Groupe ? infos_Groupe.participants : [];
     const groupe_Admin = mbre_membre.filter(p => p.admin).map(p => p.jid);
     const verif_Ovl_Admin = verif_Groupe && groupe_Admin.includes(id_Bot);
 
     const msg_Repondu = ms.message?.[mtype]?.contextInfo?.quotedMessage;
-    const auteur_Msg_Repondu = await getJid(
-      decodeJid(ms.message.extendedTextMessage?.contextInfo?.participant),
-      ms_org,
-      ovl
-    );
+    const auteur_Msg_Repondu =
+      participantQuoted == decodeJid(ovl.user.lid)
+        ? id_Bot
+        : await getJid(decodeJid(participantQuoted), ms_org, ovl);
+
     const mentionnes = ms.message?.[mtype]?.contextInfo?.mentionedJid || [];
     const mention_JID = await Promise.all(mentionnes.map(lid => getJid(lid, ms_org, ovl)));
     const auteur_Message = verif_Groupe
-      ? await getJid(decodeJid(ms.key.participant), ms_org, ovl)
-      : ms.key.fromMe ? id_Bot : decodeJid(ms.key.remoteJid);
+      ? await getJid(decodeJid(ms.key.participantAlt || ms.key.participant), ms_org, ovl)
+      : ms.key.fromMe
+        ? id_Bot
+        : decodeJid(ms.key.participantPn || ms.key.participant || ms.key.remoteJidAlt || ms.key.senderPn || ms.key.remoteJid);
 
     const nom_Auteur_Message = ms.pushName;
 
@@ -70,9 +84,11 @@ module.exports = async function message_upsert(m, ovl) {
       }
     }
 
-    const isCmd = texte.startsWith(prefixe);
-    const cmdName = isCmd ? texte.slice(prefixe.length).trim().split(/ +/)[0].toLowerCase() : "";
-
+    const isCmd = texte.trimStart().startsWith(config.PREFIXE);
+    const cmdName = isCmd
+      ? texte.slice(config.PREFIXE.length).trim().split(/ +/)[0].toLowerCase()
+      : "";
+    
     const Ainz = '22651463203';
     const Ainzbot = '22605463559';
     const devNumbers = [Ainz, Ainzbot];
