@@ -60,6 +60,8 @@ module.exports = async function message_upsert(m, ovl) {
     const verif_Ovl_Admin = verif_Groupe && groupe_Admin.includes(id_Bot);
 
     const msg_Repondu = ms.message?.[mtype]?.contextInfo?.quotedMessage;
+    const participantQuoted = ms.message?.[mtype]?.contextInfo?.participant;
+
     const auteur_Msg_Repondu =
       participantQuoted == decodeJid(ovl.user.lid)
         ? id_Bot
