@@ -18,7 +18,8 @@ const ms_badge = {
 
 async function group_participants_update(data, ovl) {
   try {
-    for (const participant of data.participants) {
+    for (const part of data.participants) {
+      const participant = part.phoneNumber || part;
       if (
         data.action === 'add' &&
         data.id === '120363031940789145@g.us' &&
