@@ -1,8 +1,17 @@
 const fs = require('fs');
 const path = require('path');
-const { delay, DisconnectReason } = require("@whiskeysockets/baileys");
+const { delay, DisconnectReason, jidDecode } = require("@whiskeysockets/baileys");
 let evt = require("../lib/ovlcmd");
 const config = require("../set");
+
+const decodeJid = (jid) => {
+  if (!jid) return jid;
+  if (/:\d+@/gi.test(jid)) {
+    const d = jidDecode(jid) || {};
+    return (d.user && d.server && `${d.user}@${d.server}`) || jid;
+  }
+  return jid;
+};
 
 async function connection_update(con, ovl, main) {
   const { connection, lastDisconnect } = con;
@@ -44,7 +53,7 @@ async function connection_update(con, ovl, main) {
 
       console.log(start_msg + "\n");
       await delay(5000);
-        await ovl.sendMessage(ovl.user.id, { text: start_msg });
+        await ovl.sendMessage(decodeJid(ovl.user.id), { text: start_msg });
       break;
 
     case "close":
