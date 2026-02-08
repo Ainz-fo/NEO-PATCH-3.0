@@ -41,6 +41,7 @@ async function main() {
       generateHighQualityLinkPreview: true
     });
     ovl.ev.on("messages.upsert", async (m) => message_upsert(m, ovl));
+    ovl.ev.on('groups.update', d => group_update(d, ovl))
     ovl.ev.on("group-participants.update", async (data) => group_participants_update(data, ovl));
     ovl.ev.on("connection.update", (update) => connection_update(update, ovl, main));
     ovl.ev.on("creds.update", saveCreds);
