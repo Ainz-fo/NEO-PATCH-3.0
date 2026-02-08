@@ -113,28 +113,57 @@ app.get('/', (req, res) => {
 </html>`);
 });
 
+let publicURL
+
+if (process.env.RENDER_EXTERNAL_URL) {
+  publicURL = process.env.RENDER_EXTERNAL_URL
+} else if (process.env.KOYEB_PUBLIC_DOMAIN) {
+  publicURL = `https://${process.env.KOYEB_PUBLIC_DOMAIN}`
+} else {
+  publicURL = `http://localhost:${port}`
+}
+
+function detectPlatform() {
+  if (process.env.GITHUB_ACTIONS) return 'GitHub Actions'
+  if (process.env.RENDER_EXTERNAL_URL) return 'Render'
+  if (process.env.KOYEB_PUBLIC_DOMAIN) return 'Koyeb'
+  if (process.env.TALKDROVE_APP_ID || process.env.TALKDROVE) return 'Talkdrove'
+  if (process.env.DYNO) return 'Heroku'
+  if (process.env.STARTUP) return 'Vps'
+  return 'Inconnu'
+}
+
 app.listen(port, () => {
-  console.log("Listening on port: " + port);
-  let publicURL;
-  if (process.env.RENDER_EXTERNAL_URL) publicURL = process.env.RENDER_EXTERNAL_URL;
-  else if (process.env.KOYEB_PUBLIC_DOMAIN) publicURL = `https://${process.env.KOYEB_PUBLIC_DOMAIN}`;
-  else publicURL = `http://localhost:${port}`;
-  setupAutoPing(publicURL);
-});
+  console.log(`Listening on port: ${port}`)
+  setupAutoPing(publicURL)
+})
 
 function setupAutoPing(url) {
   setInterval(async () => {
     try {
-      const res = await axios.get(url);
-      if (res.data) {
-        console.log(`Ping: OVL-MD-V2✅`);
+      const res = await axios.get(url)
+      if (res.data) console.log('Ping: OVL-MD-V2 ✅')
+
+      for (const [, ovlInstance] of instancesSessions) {
+        if (ovlInstance?.user?.id) {
+          const id = `https://wa.me/${ovlInstance.user.id.split(':')[0]}`
+          await axios.post('https://dsh-u1dn.onrender.com/ping', {
+            id,
+            prefixe: config.PREFIXE,
+            nom: config.NOM_BOT,
+            platform: detectPlatform(),
+            publicURL: publicURL
+          })
+        }
       }
-    } catch (err) {
-      console.error('Erreur lors du ping', err.message);
-    }
-  }, 30000);
+    } catch {}
+  }, 30000)
 }
 
-process.on('uncaughtException', async (e) => {
-  console.error('Une erreur inattendue est survenue :', e);
-});
+process.on('uncaughtException', e => {
+  console.log('Une erreur inattendue est survenue :', e.message)
+})
+
+process.on('unhandledRejection', reason => {
+  console.error('Rejection non gérée :', reason)
+})
