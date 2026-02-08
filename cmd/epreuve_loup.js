@@ -65,7 +65,7 @@ ovlcmd({
   desc: "Lance l'épreuve du loup"
 }, async (ms_org, ovl, { repondre, auteur_Message }) => {
   try {
-    const chatId = ms_org.key?.remoteJid || ms_org;
+    const chatId = ms_org;
 
     await ovl.sendMessage(chatId, { video: { url: 'https://files.catbox.moe/z64kuq.mp4' }, gifPlayback: true });
 
@@ -110,7 +110,7 @@ Le modérateur doit ensuite envoyer la liste des participants avec leurs niveaux
 // LECTURE LISTE DES PARTICIPANTS
 // ──────────────────────────────
 ovlcmd({ nom_cmd: 'liste_loup', isfunc: true }, async (ms_org, ovl, { texte, getJid, repondre }) => {
-  const chatId = ms_org.key?.remoteJid || ms_org;
+  const chatId = ms_org;
   const epreuve = epreuvesLoup.get(chatId);
 
   if (!epreuve || !epreuve.debut) return;
@@ -124,11 +124,12 @@ ovlcmd({ nom_cmd: 'liste_loup', isfunc: true }, async (ms_org, ovl, { texte, get
     if (!m) continue;
 
     const tag = m[1];
+    console.log(tag);
     const niveau = parseInt(m[2], 10);
     const isLoup = /\(loup\)/i.test(ligne);
 
     let jid;
-    try { jid = await getJid(tag + "@lid", ms_org, ovl); } catch { continue; }
+    try { jid = await getJid(tag, ms_org, ovl); } catch { continue; }
 
     epreuve.participants.push({ jid, tag, niveau });
     if (isLoup) loupJid = jid;
@@ -219,7 +220,7 @@ ovlcmd({
 // ──────────────────────────────
 ovlcmd({ nom_cmd: 'stoploup', desc: "Arrête l'épreuve", react: '🛑' }, async (ms_org, ovl, { repondre, commande }) => {
   if (commande !== 'stoploup') return;
-  const chatId = ms_org.key?.remoteJid || ms_org;
+  const chatId = ms_org;
   const epreuve = epreuvesLoup.get(chatId);
   if (!epreuve) return;
 
@@ -230,7 +231,7 @@ ovlcmd({ nom_cmd: 'stoploup', desc: "Arrête l'épreuve", react: '🛑' }, async
 
 ovlcmd({ nom_cmd: 'pauseloup', desc: "Pause", react: '⏸️' }, async (ms_org, ovl, { repondre, commande }) => {
   if (commande !== 'pauseloup') return;
-  const chatId = ms_org.key?.remoteJid || ms_org;
+  const chatId = ms_org;
   const epreuve = epreuvesLoup.get(chatId);
   if (!epreuve) return;
 
@@ -240,7 +241,7 @@ ovlcmd({ nom_cmd: 'pauseloup', desc: "Pause", react: '⏸️' }, async (ms_org, 
 
 ovlcmd({ nom_cmd: 'resumeloup', desc: "Reprise", react: '▶️' }, async (ms_org, ovl, { repondre, commande }) => {
   if (commande !== 'resumeloup') return;
-  const chatId = ms_org.key?.remoteJid || ms_org;
+  const chatId = ms_org;
   const epreuve = epreuvesLoup.get(chatId);
   if (!epreuve || !epreuve.loupJid) return;
 
