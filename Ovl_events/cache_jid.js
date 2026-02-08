@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const filePath = path.join(__dirname, "../lib/cache_jid.json");
+const filePath = path.join(__dirname, "../../lib/cache_jid.json");
 
 if (!fs.existsSync(filePath)) {
   fs.writeFileSync(filePath, JSON.stringify({}, null, 2));
@@ -30,7 +30,7 @@ async function getJid(lid, ms_org, ovl, attempt = 0) {
     const participant = metadata.participants.find(p => p.id == lid);
     if (!participant) return null;
 
-    const jid = participant.jid || participant.id;
+    const jid = participant.jid || participant.phoneNumber;
     cache[lid] = jid;
     writeCache(cache);
 
