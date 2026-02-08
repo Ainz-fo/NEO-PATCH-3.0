@@ -1,4 +1,5 @@
 const config = require('../set');
+const { groupCache } = require('../lib/groupeCache');
 
 const ms_badge = {
   key: {
@@ -18,6 +19,9 @@ const ms_badge = {
 
 async function group_participants_update(data, ovl) {
   try {
+    const groupInfo = await ovl.groupMetadata(data.id);
+    groupCache.set(data.id, groupInfo);
+    
     for (const part of data.participants) {
       const participant = part.phoneNumber || part;
       if (
