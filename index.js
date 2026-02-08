@@ -9,6 +9,7 @@ const {
   Browsers,
   useMultiFileAuthState
 } = require("@whiskeysockets/baileys");
+const { groupCache } = require('./lib/groupeCache');
 const { get_session, restaureAuth } = require('./DataBase/session');
 const config = require('./set');
 const {
@@ -35,6 +36,7 @@ async function main() {
       },
       logger: pino({ level: 'silent' }),
       browser: Browsers.ubuntu('Chrome'),
+      cachedGroupMetadata: async jid => groupCache.get(jid),
       markOnlineOnConnect: false,
       generateHighQualityLinkPreview: true
     });
