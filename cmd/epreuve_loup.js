@@ -124,7 +124,7 @@ ovlcmd({ nom_cmd: 'liste_loup', isfunc: true }, async (ms_org, ovl, { texte, get
     if (!m) continue;
 
     const tag = m[1];
-    console.log(tag);
+    repondre(tag);
     const niveau = parseInt(m[2], 10);
     const isLoup = /\(loup\)/i.test(ligne);
 
@@ -155,7 +155,7 @@ Veuillez toucher un joueur avant la fin du temps ⌛ (3:00 min)`,
 // ──────────────────────────────
 // GESTION AUTOMATIQUE DES TIRS
 // ──────────────────────────────
-async function gererMessageTir(message, ovl, ms_org, texte, mention_JID, auteur_Message, getJid) {
+async function gererMessageTir(ovl, ms_org, texte, mention_JID, auteur_Message, getJid) {
   try {
     const epreuve = epreuvesLoup.get(ms_org);
     if (!epreuve || !epreuve.loupJid || epreuve.tirEnCours) return;
@@ -204,8 +204,8 @@ async function gererMessageTir(message, ovl, ms_org, texte, mention_JID, auteur_
 ovlcmd({
   nom_cmd: 'tir_loup_auto',
   isfunc: true
-}, async (ms_org, ovl, { ms, texte, getJid }) => {
-  await gererMessageTir(ms, ovl, getJid);
+}, async (ms_org, ovl, { ovl, ms_org, texte, mention_JID, auteur_Message, getJid }) => {
+  await gererMessageTir(ovl, ms_org, texte, mention_JID, auteur_Message, getJid);
 });
 
 // ──────────────────────────────
