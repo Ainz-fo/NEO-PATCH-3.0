@@ -132,6 +132,16 @@ module.exports = async function message_upsert(m, ovl) {
       }
     };
     const repondre = (msg) => ovl.sendMessage(ms_org, { text: msg }, { quoted: ms });
+    const provenance = verif_Groupe ? `👥 ${nom_Groupe}` : `💬 Privé`;
+    
+    console.log(
+      `\n━━━━━━━[ OVL-LOG-MSG ]━━━━━━\n` +
+      `👤 Auteur  : ${nom_Auteur_Message} (${auteur_Message})\n` +
+      `🏷️ Source  : ${provenance}\n` +
+      `📩 Type    : ${mtype}\n` +
+      (texte && texte.trim() !== "" ? `📝 Texte   : ${texte}\n` : "") +
+      `━━━━━━━━━━━━━━━━━━━━━━━\n`
+    );
 
     const cmd_options = {
       verif_Groupe,
