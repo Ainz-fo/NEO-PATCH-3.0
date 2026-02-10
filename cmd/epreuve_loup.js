@@ -155,21 +155,14 @@ Veuillez toucher un joueur avant la fin du temps ⌛ (3:00 min)`,
 // ──────────────────────────────
 // GESTION AUTOMATIQUE DES TIRS
 // ──────────────────────────────
-async function gererMessageTir(message, ovl, getJid) {
+async function gererMessageTir(message, ovl, ms_org, texte, mention_JID, auteur_Message, getJid) {
   try {
-    if (!message?.message) return;
-    const chatId = message.key?.remoteJid;
-    if (!chatId) return;
-
-    const epreuve = epreuvesLoup.get(chatId);
+    const epreuve = epreuvesLoup.get(ms_org);
     if (!epreuve || !epreuve.loupJid || epreuve.tirEnCours) return;
 
-    const auteur = normalizeJid(message.key?.participant || message.key?.remoteJid);
-    if (auteur !== epreuve.loupJid) return;
+    if (auteur_Message !== epreuve.loupJid) return;
 
-    const texte = message.message.conversation || message.message.extendedTextMessage?.text || "";
-    const mentions = message.message.extendedTextMessage?.contextInfo?.mentionedJid || [];
-    if (!texte.includes("⚽") || mentions.length === 0) return;
+    if (!texte.includes("⚽") || mention_JID.length === 0) return;
 
     const cibleJid = normalizeJid(mentions[0]);
     const cible = epreuve.participants.find(p => normalizeJid(p.jid) === cibleJid);
@@ -181,18 +174,18 @@ async function gererMessageTir(message, ovl, getJid) {
 
     // Calcul du succès automatique
     let chance = 50 + (Math.random() * 20 - 10);
-    const touché = Math.random() * 100 <= chance;
+    const touche = Math.random() * 100 <= chance;
 
-    if (touché) {
+    if (touche) {
       epreuve.loupJid = cibleJid;
-      await ovl.sendMessage(chatId, {
+      await ovl.sendMessage(ms_org, {
         video: { url: 'https://files.catbox.moe/eckrvo.mp4' },
         gifPlayback: true,
         caption: `✅ **TOUCHÉ !**\n@${jidBase(cibleJid)} devient le nouveau Loup 🐺.`,
         mentions: [cibleJid]
       });
     } else {
-      await ovl.sendMessage(chatId, {
+      await ovl.sendMessage(ms_org, {
         video: { url: ['https://files.catbox.moe/obqo0d.mp4','https://files.catbox.moe/m00580.mp4'][Math.floor(Math.random()*2)] },
         gifPlayback: true,
         caption: `❌ **RATÉ !**\nLe Loup reste @${jidBase(epreuve.loupJid)}.`,
@@ -211,8 +204,8 @@ async function gererMessageTir(message, ovl, getJid) {
 ovlcmd({
   nom_cmd: 'tir_loup_auto',
   isfunc: true
-}, async (ms_org, ovl, { texte, getJid }) => {
-  await gererMessageTir(ms_org, ovl, getJid);
+}, async (ms_org, ovl, { ms, texte, getJid }) => {
+  await gererMessageTir(ms, ovl, getJid);
 });
 
 // ──────────────────────────────
